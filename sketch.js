@@ -3,18 +3,30 @@ let years = [];
 let currentYearIndex = 0;
 let testsByYear = {};
 let countries = [];
+let mushroomImg;
+let countryOrder = ['INDIA', 'PAKISTAN', 'USA', 'URSS', 'FRANCE', 'UK', 'CHINA'];
 
 function preload() {
   table = loadTable('sipri-report-explosions.csv', 'csv', 'header');
+  mushroomImg = loadImage('bleauuu.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   processData();
+  document.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 }
 
 function draw() {
   background(20);
+
+  if (mushroomImg) {
+    push();
+    imageMode(CENTER);
+    tint(255);
+    image(mushroomImg, width / 2, height / 2, width, height);
+    pop();
+  }
   
   if (years.length === 0) {
     fill(255);
@@ -27,6 +39,7 @@ function draw() {
   let currentYear = years[currentYearIndex];
   let yearData = testsByYear[currentYear];
   
+  drawTitle();
   drawYearNavigation(currentYear);
   drawTestDots(yearData);
   drawBottomInfo(yearData);
@@ -63,6 +76,14 @@ function processData() {
   
   years.sort((a, b) => a - b);
   countries.sort();
+
+  countries = countryOrder.filter(c => countries.includes(c));
+  let remainingCountries = allTests
+    .map(t => t.country)
+    .filter(c => !countries.includes(c))
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort();
+  countries = countries.concat(remainingCountries);
 }
 
 function getYieldColor(y) {
@@ -75,6 +96,14 @@ function getYieldColor(y) {
   else if (y >= 151 && y <= 4999) return color(209, 0, 157, 255);
   else if (y >= 5000) return color(118, 0, 87, 255);
   return color(150, 150, 150, 255);
+}
+
+function drawTitle() {
+  noStroke();
+  textAlign(CENTER, TOP);
+  textSize(32);
+  fill(255);
+  text("Nuclear Text each Year", width / 2, 20);
 }
 
 function drawYearNavigation(currentYear) {
@@ -139,7 +168,7 @@ function drawTestDots(yearData) {
   
   noStroke();
   textAlign(CENTER);
-  textSize(13);
+  textSize(14);
   fill(200);
   countries.forEach((country, idx) => {
     text(country, startX + idx * columnSpacing + 4, lineY + 30);
@@ -156,7 +185,7 @@ function drawBottomInfo(yearData) {
   rect(50, boxY, 200, 100, 10);
   fill(255);
   textAlign(LEFT);
-  textSize(16);
+  textSize(14);
   text("TOTALE EVENTI", 65, boxY + 30);
   textSize(32);
   text(total, 65, boxY + 65);
@@ -165,7 +194,7 @@ function drawBottomInfo(yearData) {
   fill(40);
   rect(width - 280, boxY, 230, 100, 10);
   fill(255);
-  textSize(16);
+  textSize(12);
   text("LEGENDA POTENZA", width - 265, boxY + 20);
   
   let legend = [
